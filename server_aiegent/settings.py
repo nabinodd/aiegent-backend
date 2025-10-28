@@ -36,7 +36,7 @@ INSTALLED_APPS = [
    'rest_framework',
 
    'commons',
-   # 'visitors',
+   'ttsgenerators',
 
 ]
 

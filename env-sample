@@ -1,0 +1,21 @@
+# General
+DEBUG=True
+
+# Security
+SECRET_KEY='secret-key-placeholder'
+OPENAI_API_KEY=
+ALLOWED_HOSTS='*'
+
+
+# Postgresql
+DB_HOST=
+DB_PORT=
+DB_NAME=
+DB_USER=
+DB_PASS=
+
+# DRF
+PAGE_SIZE=10
+
+SERVER_DOMAIN=
+GPU_ACCELERATION='mps'

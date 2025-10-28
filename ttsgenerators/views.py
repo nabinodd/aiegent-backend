@@ -18,9 +18,9 @@ OUTPUT_SUBDIR = "tts"
 
 SYNTHESIS_CFG = SynthesisConfig(
     volume=1.0,
-    length_scale=1.0,
-    noise_scale=1.0,
-    noise_w_scale=1.0,
+    length_scale=0.95,
+    noise_scale=0.667,
+    noise_w_scale=0.8,
     normalize_audio=False,
 )
 
@@ -46,18 +46,25 @@ def _synthesize_wav(text, wav_path) -> None:
     with wave.open(wav_path, "wb") as wav_file:
         VOICE.synthesize_wav(text, wav_file, syn_config=SYNTHESIS_CFG)
 
-def _to_ogg_opus_mono(in_wav, out_ogg) -> None:
-    """
-    Convert WAV -> OGG (Opus, mono) suitable for WhatsApp voice-note style.
-    """
+def _to_ogg_opus_mono(in_wav, out_ogg):
     if not _ffmpeg_ok():
         raise RuntimeError("ffmpeg not found. Install ffmpeg to produce ogg/opus.")
-    cmd = ["ffmpeg", "-y", "-i", in_wav, "-c:a", "libopus", "-b:a", "48k", "-ac", "1", out_ogg]
+    cmd = [
+        "ffmpeg", "-y", "-i", in_wav,
+        "-ar", "16000",         # resample for speech; stable on WA
+        "-ac", "1",             # mono
+        "-af", "loudnorm=I=-18:TP=-2:LRA=7",  # clean, broadcast-ish loudness
+        "-c:a", "libopus",
+        "-b:a", "32k",          # speech transparent at 24–32k
+        "-vbr", "on",
+        "-application", "voip", # Opus tuning for speech
+        "-frame_duration", "60",# fewer artifacts; longer frames ok for voice
+        "-compression_level", "10",
+        out_ogg
+    ]
     subprocess.run(cmd, check=True)
-    try:
-        os.remove(in_wav)
-    except OSError:
-        pass
+    try: os.remove(in_wav)
+    except OSError: pass
 
 
 class TextToSpeechAPIView(APIView):
@@ -71,7 +78,7 @@ class TextToSpeechAPIView(APIView):
         try:
             out_dir = _ensure_out_dir()
         except Exception as e:
-            return Response({"detail"(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         uid = uuid.uuid4().hex
         out_filename = f"{uid}.ogg"

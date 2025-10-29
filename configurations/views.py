@@ -8,7 +8,7 @@ from .models import AllowedNumber
 
 class CheckAccessAPIView(APIView):
     permission_classes = [AllowAny]
-    
+
     def post(self, request, format=None):
         phone_number = request.data.get('phone_number')
         if not phone_number:
@@ -26,5 +26,5 @@ class CheckAccessAPIView(APIView):
         else:
             return Response(
                 {"allowed": False},
-                status=status.HTTP_403_FORBIDDEN
+                status=status.HTTP_200_OK
             )

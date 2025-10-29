@@ -17,14 +17,15 @@ class CheckAccessAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        is_allowed = AllowedNumber.objects.filter(number=phone_number).exists()
-        if is_allowed:
-            return Response(
-                {"allowed": True},
-                status=status.HTTP_200_OK
-            )
-        else:
-            return Response(
-                {"allowed": False},
-                status=status.HTTP_200_OK
-            )
+        number = AllowedNumber.objects.filter(number=phone_number)
+        if number.exists():
+            if number.first().is_allowed:
+                return Response(
+                    {"allowed": True},
+                    status=status.HTTP_200_OK
+                )
+
+        return Response(
+            {"allowed": False},
+            status=status.HTTP_200_OK
+        )

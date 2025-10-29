@@ -8,4 +8,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     path('api/v1/ttsgenerators/', include('ttsgenerators.urls')),
+    path('api/v1/chatstorage/', include('chatstorage.urls')),
 ]

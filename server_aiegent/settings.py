@@ -37,6 +37,7 @@ INSTALLED_APPS = [
 
    'chatstorage',
    'commons',
+   'configurations',
    'ttsgenerators',
 
 ]
